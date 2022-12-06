@@ -1,0 +1,106 @@
+package HerOkuAppSmokeTest;
+
+import base_urls.HerOkuAppBaseUrl;
+import io.restassured.http.ContentType;
+import io.restassured.response.Response;
+import org.junit.Test;
+import pojos.BookingDatesPojo;
+import pojos.BookingPojo;
+import pojos.BookingResponsePojo;
+import utils.JsonUtils;
+import static io.restassured.RestAssured.given;
+import static org.junit.Assert.assertEquals;
+public class S1Post extends HerOkuAppBaseUrl {
+/*Type an automation smoke test by using "https://restful-booker.herokuapp.com/apidoc/index.html" documentation.
+Create a booking then update, read and delete the booking you created.
+
+*/                                                  //TO DO THIS TEST//
+//Copy&Paste this Document to google then go to create on the left,gives us all details we need then we write our Gorken Test base on that
+/*
+Given
+https://restful-booker.herokuapp.com/booking
+AND
+            {
+            "firstname" : "Jim",
+            "lastname" : "Brown",
+            "totalprice" : 111,
+            "depositpaid" : true,
+            "bookingdates" : {
+            "checkin" : "2018-01-01",
+            "checkout" : "2019-01-01"
+            },
+            "additionalneeds" : "Breakfast"
+            }
+When
+  User send Post request
+Then
+  Status Code must be 200
+And
+  Response body is like
+                                    {
+                        "bookingid": 18153,
+                        "booking": {
+                            "firstname": "Jim",
+                            "lastname": "Brown",
+                            "totalprice": 111,
+                            "depositpaid": true,
+                            "bookingdates": {
+                                "checkin": "2018-01-01",
+                                "checkout": "2019-01-01"
+                            },
+                            "additionalneeds": "Breakfast"
+                        }
+                    }
+ */
+   static int bookingid;   // we need this in put class to get this id from response body
+@Test
+    public void post(){
+
+    // set the url
+spec.pathParam("first", "booking");
+
+    // set the expected data
+
+BookingDatesPojo bookingDatesPojo = new BookingDatesPojo("2018-01-01","2019-01-01");
+BookingPojo expectedData = new BookingPojo("Jim","Brown",111,true,bookingDatesPojo,"Breakfast");
+System.out.println("expectedData =" + expectedData );
+
+    // send the request and get the response
+Response response =  given().spec(spec).contentType(ContentType.JSON).body(expectedData).post("/{first}");
+response.prettyPrint();
+
+    // DO Assertion == need to convert Data which is expectedData and is as response into Pojo-
+
+BookingResponsePojo actualData =  JsonUtils.convertJsonToJavaObject(response.asString(), BookingResponsePojo.class);
+                            //in JsonUtils class we have convertJsonToJavaObject class and is using ObjectMapper to convert
+System.out.println(" actualData =" +  actualData );
+
+assertEquals(200,response.statusCode());
+assertEquals(expectedData.getFirstname(),actualData.getBooking().getFirstname());
+assertEquals(expectedData.getLastname(),actualData.getBooking().getLastname());
+assertEquals(expectedData.getTotalprice(),actualData.getBooking().getTotalprice());
+assertEquals(expectedData.getDepositpaid(),actualData.getBooking().getDepositpaid());
+
+assertEquals(bookingDatesPojo.getCheckin(),actualData.getBooking().getBookingdates().getCheckin());
+assertEquals(bookingDatesPojo.getCheckout(),actualData.getBooking().getBookingdates().getCheckout());
+
+assertEquals(expectedData.getAdditionalneeds(),actualData.getBooking().getAdditionalneeds());
+
+    // now test asking to : create a booking then update ==> we go the website of Url and go there see what we should do
+
+        bookingid = actualData.getBookingid(); // to get this bookingid ( look up before @test )
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+}
